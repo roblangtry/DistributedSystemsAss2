@@ -41,7 +41,10 @@ public class Parser {
         while(reader.ready()){
             String line = reader.readLine();
             if(line.equals("")) user_info = true;
-            else if(sysadmin) this.password = line;
+            else if(sysadmin) {
+                this.password = line;
+                sysadmin = false;
+            }
             else if(user_info){
                 String[] strings = line.split("\t", -1);
                 if(strings.length != 2) throw new Exception();

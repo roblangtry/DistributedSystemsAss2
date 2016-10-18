@@ -22,7 +22,7 @@ public class ServerManager {
     private ArrayList<StringLock> identityLocks;
     private ArrayList<StringLock> roomLocks;
     private ArrayList<User> login;
-    public ServerManager(String serverId, ServerCommunicator serverComms, ArrayList<User> users){
+    public ServerManager(String serverId, ServerCommunicator serverComms, ArrayList<User> users, String password){
         this.serverId = serverId;
         this.defaultRoomId = "MainHall-" + serverId;
         this.myRooms = new ArrayList<Room>();
@@ -30,6 +30,7 @@ public class ServerManager {
         this.identityLocks = new ArrayList<StringLock>();
         this.roomLocks = new ArrayList<StringLock>();
         this.login = users;
+        this.password = password;
         this.serverCommunicator = serverComms;
         myRooms.add(new Room(this.defaultRoomId, ""));
     }
