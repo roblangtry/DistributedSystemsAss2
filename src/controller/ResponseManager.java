@@ -174,8 +174,13 @@ public class ResponseManager {
         AwayRoom away = serverManager.foriegnRoom(roomid);
         //does this room exist on another server
         if(away != null) { // the room exists on another server
-            System.out.printf("Moving to Foriegn Room... ");
-            serverManager.moveToForiegnRoom(roomid, former, client, away);
+            if(serverManager.canJoin(roomid)){
+                System.out.printf("Moving to Foriegn Room... ");
+                serverManager.moveToForiegnRoom(roomid, former, client, away);
+            }else{
+                //server dead
+                serverManager.moveToRoom(former, former, client);
+            }
         }
         else { // the room exists on this server
             System.out.printf("Moving to Room... ");

@@ -6,6 +6,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Server Manager
@@ -29,6 +30,27 @@ public class ServerManager {
         this.serverCommunicator = serverComms;
         myRooms.add(new Room(this.defaultRoomId, ""));
     }
+
+    public boolean canJoin(String roomid){
+        boolean join = false;
+        String serverid = "";
+        //get server id
+        for(AwayRoom awayRoom:otherRooms){
+            if(awayRoom.getRoomid().equals(roomid)){
+                serverid = awayRoom.getServerid();
+                System.out.printf("Target server %s...", serverid);
+            }
+        }
+        ArrayList<String> aliveServers = serverCommunicator.checkOtherServers();
+        for(String s: aliveServers){
+            if(s.equals(serverid)){
+                join = true;
+            }
+        }
+        System.out.printf(join + "...");
+        return join;
+    }
+
     public Room getRoom(Client client) throws Exception {
         //get the room a client is in
         for ( Room room : myRooms){
@@ -181,9 +203,22 @@ public class ServerManager {
                 return this.releaseRoom(jsonObject);
             case "deleteroom":
                 return this.deletedRoom(jsonObject);
+            case "checkalive":
+                return this.checkAlive(jsonObject);
             default:
                 return "";
         }
+    }
+
+    private String checkAlive(JSONObject jsonObject){
+
+        String sender = (String)jsonObject.get("serverid");
+        JSONObject returnObject = new JSONObject();
+        returnObject.put("type","checkalive");
+        returnObject.put("serverid",this.serverId);
+        //System.out.println(returnObject.toJSONString());
+        return returnObject.toJSONString();
+
     }
 
     private synchronized String lockIdentity(JSONObject jsonObject) {
@@ -343,4 +378,25 @@ public class ServerManager {
         }
         System.out.printf("Server Manager Shutdown... ");
     }
+
+    public void deleteForeignRoom(String sid){
+
+        int[] ids = new int[otherRooms.size()];
+        int j = 0;
+        for(AwayRoom awayRoom : otherRooms){
+            for(int i=0;i<otherRooms.size();i++){
+                if(otherRooms.get(i).getServerid().equals(sid)){
+                    ids[j] = i;
+                    j++;
+                }
+            }
+        }
+        for(int k=0; k<j;k++){
+            otherRooms.remove(ids[k]);
+        }
+    }
+
+
+
+
 }

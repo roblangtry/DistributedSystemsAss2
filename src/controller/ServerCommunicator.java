@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Server Communicator
@@ -19,23 +22,100 @@ import java.net.*;
 public class ServerCommunicator {
     ServerSocket serverSocket;
     ServerThread serverThread;
+    ServerManager serverManager;
     ServerConfiguration[] otherServers;
+    String serverId;
     public ServerCommunicator(String serverId, int serverPort,
                               ServerConfiguration[] otherServers)
                               throws IOException {
         this.serverSocket = new ServerSocket(serverPort);
         System.out.printf("Port %d used... ", serverPort);
         this.otherServers = otherServers;
+        this.serverId = serverId;
     }
     public void start(ServerManager sManager){
         this.serverThread = new ServerThread(serverSocket, sManager);
         this.serverThread.start();
+        this.serverManager = sManager;
+        Timer timer = new Timer();
+        TimerTask aliveTask = new TimerTask() {
+            @Override
+            public void run() {
+                processCheckAlive();
+            }
+        };
+        timer.schedule(aliveTask,10000,60000);
+
     }
     public void close(){
         try {
             serverThread.interrupt();
             serverSocket.close();
         } catch (IOException e) {}
+    }
+
+    public ArrayList<String> checkOtherServers(){
+        ArrayList<String> aliveServers = new ArrayList<>();
+        CommunicationNode node = null;
+        for(ServerConfiguration config : otherServers){
+            try {
+                node = new CommunicationNode(config);
+                JSONParser parser = new JSONParser();
+                JSONObject obj = new JSONObject();
+                obj.put("type","checkalive");
+                obj.put("serverid", serverId);
+                String command = obj.toJSONString();
+                node.writeLine(command);
+                String commandIn = node.readLine();
+                JSONObject returnObj = (JSONObject)parser.parse(commandIn);
+                aliveServers.add((String)returnObj.get("serverid"));
+                node.close();
+            } catch (IOException ioe) {
+                try {
+                    node.close();
+                } catch(Exception e){
+
+                }
+            } catch (ParseException pe) {
+                try {
+                    node.close();
+                } catch(Exception e){
+
+                }
+            }
+        }
+        return aliveServers;
+    }
+
+    private void processCheckAlive(){
+
+        ArrayList<String> aliveServers = checkOtherServers();
+        if(aliveServers.size()!=otherServers.length){
+            //dead server exists
+            ArrayList<String> deadServers = new ArrayList<>();
+            for(ServerConfiguration config : otherServers){
+                int count = 0;
+                for(String id:aliveServers){
+                    if(!id.equals(config.getServerId())){
+                        count ++;
+                    }
+                }
+                if(count==aliveServers.size()){
+                    //add to dead server list
+                    deadServers.add(config.getServerId());
+                }
+            }
+            //handling
+            for(String id :deadServers){
+                System.out.println("dead server found: " + id);
+                //remove chatrooms
+                serverManager.deleteForeignRoom(id);
+                //remove from otherServers
+
+            }
+
+        }
+
     }
 
     public boolean obtainIdentityLocks(String identity, String serverId) {
@@ -224,4 +304,5 @@ public class ServerCommunicator {
             }
         }
     }
+
 }
