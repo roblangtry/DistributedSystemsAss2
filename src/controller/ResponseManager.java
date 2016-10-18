@@ -1,6 +1,7 @@
 package controller;
 
 import model.Client;
+import model.ServerConfiguration;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -53,6 +54,12 @@ public class ResponseManager {
                                     (String)jsonObject.get("roomid"),
                                     (String)jsonObject.get("identity"), client);
                     return true;
+                case "addServer":
+                    processAddServer((String)jsonObject.get("serverid"),
+                            (String)jsonObject.get("serveraddress"),
+                            (String)jsonObject.get("clientport"),
+                            (String)jsonObject.get("coordinationport"),
+                            (String)jsonObject.get("password"), client);
                 case "quit":
                     processQuit(client);
                     return false;
@@ -62,6 +69,27 @@ public class ResponseManager {
         } catch (ParseException e) {
             return true;
         }
+    }
+
+    private void processAddServer(String serverid,String serveraddress, String clientport,
+                                  String coordinationport, String password, Client client){
+        JSONObject jsonObject = new JSONObject();
+        if(serverManager.checkPassword(password)){
+            ServerConfiguration newConfig = new ServerConfiguration(serverid, serveraddress,
+                    clientport, coordinationport);
+            serverManager.getServerCommunicator().addNewServer(newConfig);
+            jsonObject.put("type", "addserver");
+            jsonObject.put("approved", "true");
+            jsonObject.put("serverid", serverid);
+            client.addToQueue(jsonObject.toJSONString());
+
+        }else{
+            jsonObject.put("type", "addserver");
+            jsonObject.put("approved", "false");
+            jsonObject.put("serverid", serverid);
+            client.addToQueue(jsonObject.toJSONString());
+        }
+
     }
 
     private void processMoveJoin(String former, String roomid, String identity, Client client) {

@@ -206,6 +206,16 @@ public class ServerCommunicator {
             }
         }
     }
+    public void addNewServer(ServerConfiguration newServerConfig){
+        ServerConfiguration[] configs = new ServerConfiguration[otherServers.length+1];
+        int i = 0;
+        for(ServerConfiguration server : otherServers){
+            configs[i] = server;
+            i++;
+        }
+        configs[i] = newServerConfig;
+        otherServers = configs;
+    }
 
     public boolean obtainRoomLocks(String serverId, String roomid) {
         // obtain room locks from other servers

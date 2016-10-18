@@ -13,6 +13,7 @@ import java.util.Iterator;
  * Manages operations relating between servers and the client
  */
 public class ServerManager {
+    private String password;
     private String serverId;
     private String defaultRoomId;
     private ServerCommunicator serverCommunicator;
@@ -31,6 +32,14 @@ public class ServerManager {
         this.login = users;
         this.serverCommunicator = serverComms;
         myRooms.add(new Room(this.defaultRoomId, ""));
+    }
+
+    public boolean checkPassword(String pass){
+        return pass.equals(password);
+    }
+
+    public ServerCommunicator getServerCommunicator(){
+        return serverCommunicator;
     }
 
     public boolean canJoin(String roomid){
