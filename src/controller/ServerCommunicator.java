@@ -285,10 +285,8 @@ public class ServerCommunicator {
                 throws IOException {
             SSLSocketFactory sslsocketfactory =
                     (SSLSocketFactory) SSLSocketFactory.getDefault();
-            this.socket = (SSLSocket) sslsocketfactory.createSocket();
-            SocketAddress address = new InetSocketAddress(
-                    configuration.getAddress(), configuration.getServerPort());
-            this.socket.connect(address,500);
+            this.socket = (SSLSocket) sslsocketfactory.createSocket(
+                    configuration.getAddress(),configuration.getServerPort());
             this.reader = new BufferedReader(new InputStreamReader(
                     socket.getInputStream()));
             this.writer = new PrintWriter(socket.getOutputStream());

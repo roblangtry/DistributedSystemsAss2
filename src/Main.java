@@ -27,8 +27,12 @@ public class Main {
         main.go(args);
     }
     public void go(String[] args){
-		System.setProperty("javax.net.ssl.keyStore","keystore");
-		System.setProperty("javax.net.ssl.keyStorePassword","markwilson");
+        String path = System.getProperty("user.dir");
+        String seperator = System.getProperty("file.separator");
+        String keyfile = path + seperator + "keystore";
+        System.setProperty("javax.net.ssl.trustStore", keyfile);
+        System.setProperty("javax.net.ssl.keyStore",keyfile);
+        System.setProperty("javax.net.ssl.keyStorePassword","markwilson");
         Runtime.getRuntime().addShutdownHook(new ShutdownThread(this));
         try {
             System.out.printf("Creating Parser... ");
