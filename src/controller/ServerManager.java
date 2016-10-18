@@ -21,14 +21,14 @@ public class ServerManager {
     private ArrayList<StringLock> identityLocks;
     private ArrayList<StringLock> roomLocks;
     private ArrayList<User> login;
-    public ServerManager(String serverId, ServerCommunicator serverComms){
+    public ServerManager(String serverId, ServerCommunicator serverComms, ArrayList<User> users){
         this.serverId = serverId;
         this.defaultRoomId = "MainHall-" + serverId;
         this.myRooms = new ArrayList<Room>();
         this.otherRooms = new ArrayList<AwayRoom>();
         this.identityLocks = new ArrayList<StringLock>();
         this.roomLocks = new ArrayList<StringLock>();
-        this.login = new ArrayList<User>();
+        this.login = users;
         this.serverCommunicator = serverComms;
         myRooms.add(new Room(this.defaultRoomId, ""));
     }

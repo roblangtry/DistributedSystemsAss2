@@ -36,7 +36,7 @@ public class ClientCommunicationThread extends Thread{
         BufferedReader reader = null;
         PrintWriter writer = null;
         try {
-            socket.setSoTimeout(500); // make reads non-blocking
+            socket.setSoTimeout(100); // make reads non-blocking
             reader = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream());
@@ -90,7 +90,6 @@ public class ClientCommunicationThread extends Thread{
     }
 
     private void checkClientQueue(PrintWriter writer) {
-
         boolean running = true;
         while (running){
             try {
