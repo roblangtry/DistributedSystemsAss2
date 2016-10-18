@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="Client.css" rel="stylesheet" type="text/css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="Client.js"></script>
+    <title>Client GUI</title>
+</head>
+<body>
+<div id="login">
+    <table>
+        <tr><td>Server</td><td><input type="text" id = "server"></td></tr>
+        <tr><td>Port</td><td><input type="number" id="port"></td></tr>
+        <tr><td>Username</td><td><input type="text" id="user"></td></tr>
+        <tr><td>Authorisation Username</td><td><input type="text" id="auth"></td></tr>
+        <tr><td>Authorisation Password</td><td><input type="password" id="password"></td></tr>
+        <tr><td><button id="log">Login</button></td></tr>
+    </table>
+</div>
+<div id="chat">
+<table class="fullmain">
+    <tr><td class="edge"></td><td class="main">
+<div id="m_div">
+
+    <textarea id="message_area" disabled="true"></textarea>
+    <input type="text" id="message" />
+
+</div>
+    </td><td class="edge"></td></tr>
+</table>
+</div>
+</body>
+</html>

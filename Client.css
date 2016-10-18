@@ -1,0 +1,40 @@
+.center {
+    text-align: center;
+    background-color: #99e699;
+    border: 3px solid #85e085;
+}
+.edge {
+    width: 10%;
+}
+.fullmain {
+    width: 100%;
+}
+.main {
+    width: 80%;
+}
+body {
+    background-color: #f2f2f2;
+    align-content: center;
+}
+#m_div {
+    align-content: center;
+    width: 60%;
+    border-radius: 5px;
+    background-color: #d9d9d9;
+    border: 5px solid #cccccc;
+}
+#message {
+    align-content: center;
+    margin-bottom: 10%;
+    margin-left: 10%;
+    margin-right: 10%;
+    width: 80%;
+}
+#message_area {
+    align-content: center;
+    margin-top: 4%;
+    margin-left: 10%;
+    margin-right: 10%;
+    height: 300px;
+    width: 80%;
+}
