@@ -7,6 +7,8 @@ import controller.ResponseManager;
 import java.net.Socket;
 import java.util.LinkedList;
 
+import javax.net.ssl.SSLSocket;
+
 /**
  * Client
  * A model representing a connection
@@ -16,7 +18,7 @@ public class Client {
     private String identity;
     private ClientCommunicationThread thread;
 
-    public Client(Socket socket, ResponseManager rm){
+    public Client(SSLSocket socket, ResponseManager rm){
         queue = new LinkedList<String>();
         thread = new ClientCommunicationThread(socket, this, rm);
         thread.start();

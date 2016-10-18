@@ -28,7 +28,8 @@ public class ResponseManager {
             System.out.printf("%s\n", type);
             switch (type){
                 case "newidentity":
-                    return processNewIdentity((String)jsonObject.get("identity"), client);
+                    return processNewIdentity((String)jsonObject.get("identity"), client,
+                            (String)jsonObject.get("auth"), (String)jsonObject.get("pass"));
                 case "list":
                     processList(client);
                     return true;
@@ -79,9 +80,9 @@ public class ResponseManager {
         System.out.printf("Done\n");
     }
 
-    private boolean processNewIdentity(String identity, Client client) {
+    private boolean processNewIdentity(String identity, Client client, String auth, String pass) {
         System.out.printf("Creating New Identity... ");
-        if (!serverManager.createNewIdentity(identity)) {
+        if (!serverManager.createNewIdentity(identity, auth, pass)) {
             //the servers rejected the identity
             client.failedIdentity();
             System.out.printf("Failed\n");

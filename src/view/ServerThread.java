@@ -11,15 +11,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocket;
+
 /**
  * Server Thread
  * A thread for handling communication with a server from other servers
  */
 public class ServerThread extends Thread {
-    private ServerSocket serverSocket;
+    private SSLServerSocket serverSocket;
     private ServerManager serverManager;
     private boolean shuttingdown;
-    public ServerThread(ServerSocket serverSocket,ServerManager serverManager){
+    public ServerThread(SSLServerSocket serverSocket,ServerManager serverManager){
         this.serverSocket = serverSocket;
         this.serverManager = serverManager;
         this.shuttingdown = false;
@@ -30,7 +33,7 @@ public class ServerThread extends Thread {
         boolean running = true;
         while (running){
             try {
-                Socket socket = serverSocket.accept();
+                SSLSocket socket = (SSLSocket) serverSocket.accept();
                 socket.setSoTimeout(5000);
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(socket.getInputStream()));

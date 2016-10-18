@@ -11,17 +11,19 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+import javax.net.ssl.SSLSocket;
+
 /**
  * Client Communication Thread
  * A thread that handles the communication for a single client
  */
 public class ClientCommunicationThread extends Thread{
-    private Socket socket;
+    private SSLSocket socket;
     private Client client;
     private ResponseManager responseManager;
     private boolean running;
     private boolean shuttingdown;
-    public ClientCommunicationThread(Socket socket, Client client, ResponseManager rm){
+    public ClientCommunicationThread(SSLSocket socket, Client client, ResponseManager rm){
         this.socket = socket;
         this.client = client;
         this.responseManager = rm;

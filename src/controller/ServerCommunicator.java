@@ -15,12 +15,17 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+
 /**
  * Server Communicator
  * Handles communication with other servers
  */
 public class ServerCommunicator {
-    ServerSocket serverSocket;
+	SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory)
+			SSLServerSocketFactory.getDefault();
+    SSLServerSocket serverSocket;
     ServerThread serverThread;
     ServerManager serverManager;
     ServerConfiguration[] otherServers;
@@ -28,7 +33,7 @@ public class ServerCommunicator {
     public ServerCommunicator(String serverId, int serverPort,
                               ServerConfiguration[] otherServers)
                               throws IOException {
-        this.serverSocket = new ServerSocket(serverPort);
+        this.serverSocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(serverPort);
         System.out.printf("Port %d used... ", serverPort);
         this.otherServers = otherServers;
         this.serverId = serverId;
@@ -45,7 +50,6 @@ public class ServerCommunicator {
             }
         };
         timer.schedule(aliveTask,10000,60000);
-
     }
     public void close(){
         try {
@@ -53,7 +57,6 @@ public class ServerCommunicator {
             serverSocket.close();
         } catch (IOException e) {}
     }
-
     public ArrayList<String> checkOtherServers(){
         ArrayList<String> aliveServers = new ArrayList<>();
         CommunicationNode node = null;
@@ -88,7 +91,6 @@ public class ServerCommunicator {
     }
 
     private void processCheckAlive(){
-
         ArrayList<String> aliveServers = checkOtherServers();
         if(aliveServers.size()!=otherServers.length){
             //dead server exists
@@ -111,14 +113,10 @@ public class ServerCommunicator {
                 //remove chatrooms
                 serverManager.deleteForeignRoom(id);
                 //remove from otherServers
-
             }
-
         }
-
     }
-
-    public boolean obtainIdentityLocks(String identity, String serverId) {
+    public boolean obtainIdentityLocks(String identity, String serverId, String auth, String pass) {
         // obtain identity locks on other servers
         boolean obtain = true;
         CommunicationNode node = null;
@@ -130,6 +128,8 @@ public class ServerCommunicator {
                 obj.put("type","lockidentity");
                 obj.put("serverid", serverId);
                 obj.put("identity",identity);
+                obj.put("auth", auth);
+                obj.put("pass", pass);
                 String command = obj.toJSONString();
                 node.writeLine(command);
                 String commandIn = node.readLine();
@@ -304,5 +304,4 @@ public class ServerCommunicator {
             }
         }
     }
-
 }

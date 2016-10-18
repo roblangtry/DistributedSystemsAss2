@@ -8,6 +8,7 @@ import controller.ServerManager;
  * Main
  * The Class to be run to start the program
  */
+
 public class Main {
     private ServerCommunicator serverCommunicator;
     private ServerManager serverManager;
@@ -26,6 +27,8 @@ public class Main {
         main.go(args);
     }
     public void go(String[] args){
+		System.setProperty("javax.net.ssl.keyStore","keystore");
+		System.setProperty("javax.net.ssl.keyStorePassword","markwilson");
         Runtime.getRuntime().addShutdownHook(new ShutdownThread(this));
         try {
             System.out.printf("Creating Parser... ");

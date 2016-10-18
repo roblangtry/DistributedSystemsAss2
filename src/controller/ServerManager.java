@@ -20,6 +20,7 @@ public class ServerManager {
     private ArrayList<AwayRoom> otherRooms;
     private ArrayList<StringLock> identityLocks;
     private ArrayList<StringLock> roomLocks;
+    private ArrayList<User> login;
     public ServerManager(String serverId, ServerCommunicator serverComms){
         this.serverId = serverId;
         this.defaultRoomId = "MainHall-" + serverId;
@@ -27,6 +28,7 @@ public class ServerManager {
         this.otherRooms = new ArrayList<AwayRoom>();
         this.identityLocks = new ArrayList<StringLock>();
         this.roomLocks = new ArrayList<StringLock>();
+        this.login = new ArrayList<User>();
         this.serverCommunicator = serverComms;
         myRooms.add(new Room(this.defaultRoomId, ""));
     }
@@ -75,10 +77,10 @@ public class ServerManager {
         return rooms;
     }
 
-    public boolean createNewIdentity(String identity) {
+    public boolean createNewIdentity(String identity, String auth, String pass) {
         //create a new identity for a client by checking with other servers
         System.out.printf("Obtaining Locks... ");
-        boolean allow = this.serverCommunicator.obtainIdentityLocks(identity,this.serverId);
+        boolean allow = this.serverCommunicator.obtainIdentityLocks(identity,this.serverId, auth, pass);
         System.out.printf("Releasing Locks... ");
         this.serverCommunicator.releaseIdentityLocks(identity,this.serverId);
         return allow;
@@ -211,29 +213,30 @@ public class ServerManager {
     }
 
     private String checkAlive(JSONObject jsonObject){
-
         String sender = (String)jsonObject.get("serverid");
         JSONObject returnObject = new JSONObject();
         returnObject.put("type","checkalive");
         returnObject.put("serverid",this.serverId);
-        //System.out.println(returnObject.toJSONString());
         return returnObject.toJSONString();
-
     }
 
     private synchronized String lockIdentity(JSONObject jsonObject) {
         //lock an identity
         String identity = (String)jsonObject.get("identity");
         String owner = (String)jsonObject.get("serverid");
+        String auth = (String) jsonObject.get("auth");
+        String pass = (String) jsonObject.get("pass");
         JSONObject returnObject = new JSONObject();
         returnObject.put("type","lockidentity");
         returnObject.put("serverid", this.serverId);
         returnObject.put("identity", identity);
         boolean exists = this.checkIfIdentityExists(identity);
         boolean locks = this.checkIfIdentityLocked(identity);
+        boolean authorised = this.checkAuthorised(auth, pass);
         boolean obtained = !(locks || exists);
         if(obtained) identityLocks.add(new StringLock(identity,owner));
         returnObject.put("locked",String.valueOf(obtained));
+        returnObject.put("authorised",String.valueOf(authorised));
         return returnObject.toJSONString();
     }
 
@@ -251,6 +254,15 @@ public class ServerManager {
             Client[] clients = room.getAllClients();
             for(Client c : clients){
                 if(c.getIdentity().equals(identity)) return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkAuthorised(String auth, String pass){
+        for (User u : login){
+            if (auth.equals(u.getUsername()) && pass.equals(u.getPassword())){
+                return true;
             }
         }
         return false;
@@ -380,7 +392,6 @@ public class ServerManager {
     }
 
     public void deleteForeignRoom(String sid){
-
         int[] ids = new int[otherRooms.size()];
         int j = 0;
         for(AwayRoom awayRoom : otherRooms){
@@ -395,8 +406,4 @@ public class ServerManager {
             otherRooms.remove(ids[k]);
         }
     }
-
-
-
-
 }
