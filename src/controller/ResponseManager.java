@@ -55,7 +55,7 @@ public class ResponseManager {
                                     (String)jsonObject.get("roomid"),
                                     (String)jsonObject.get("identity"), client);
                     return true;
-                case "addServer":
+                case "addserver":
                     processAddServer((String)jsonObject.get("serverid"),
                             (String)jsonObject.get("serveraddress"),
                             (String)jsonObject.get("clientport"),
@@ -76,10 +76,9 @@ public class ResponseManager {
     private void processAddServer(String serverid,String serveraddress, String clientport,
                                   String coordinationport, String password, Client client){
         JSONObject jsonObject = new JSONObject();
-        if(serverManager.checkPassword(password)){
-            ServerConfiguration newConfig = new ServerConfiguration(serverid, serveraddress,
-                    clientport, coordinationport);
-            serverManager.getServerCommunicator().addNewServer(newConfig);
+        ServerConfiguration newConfig = new ServerConfiguration(serverid,
+                serveraddress, clientport, coordinationport);
+        if(serverManager.checkPassword(password) && serverManager.getServerCommunicator().addNewServer(newConfig)){
             jsonObject.put("type", "addserver");
             jsonObject.put("approved", "true");
             jsonObject.put("serverid", serverid);

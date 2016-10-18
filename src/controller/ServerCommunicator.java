@@ -206,15 +206,19 @@ public class ServerCommunicator {
             }
         }
     }
-    public void addNewServer(ServerConfiguration newServerConfig){
+    public boolean addNewServer(ServerConfiguration newServerConfig){
         ServerConfiguration[] configs = new ServerConfiguration[otherServers.length+1];
         int i = 0;
         for(ServerConfiguration server : otherServers){
+            if(server.getServerId().equals(newServerConfig.getServerId()))
+                return false;
             configs[i] = server;
             i++;
         }
         configs[i] = newServerConfig;
         otherServers = configs;
+        System.out.printf("Added Server '%s'\n",newServerConfig.getServerId());
+        return true;
     }
 
     public boolean obtainRoomLocks(String serverId, String roomid) {
