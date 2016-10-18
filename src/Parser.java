@@ -1,8 +1,10 @@
 import model.ServerConfiguration;
+import model.User;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 
 /**
  * Parser
@@ -13,7 +15,10 @@ public class Parser {
     public String serverConfFilename;
     public ServerConfiguration[] otherServers;
     public ServerConfiguration configuration;
+    public ArrayList<User> users;
+    String password;
     public Parser(String[] args) throws Exception {
+        users = new ArrayList<User>();
         String n = "",l = "";
         if(args.length != 4) throw new Exception();
         if(args[0].equals("-n")) n = args[1];
@@ -31,12 +36,22 @@ public class Parser {
         File file = new File(serverConfFilename);
         BufferedReader reader = new BufferedReader(new FileReader(file));
         ServerConfiguration[] confs = new ServerConfiguration[0];
+        boolean sysadmin = true;
+        boolean user_info = false;
         while(reader.ready()){
             String line = reader.readLine();
-            String[] strings = line.split("\t",-1);
-            if(strings.length != 4) throw new Exception();
-            ServerConfiguration sConf = new ServerConfiguration(strings[0],strings[1],strings[2],strings[3]);
-            confs = appendToList(confs, sConf);
+            if(line.equals("")) user_info = true;
+            else if(sysadmin) this.password = line;
+            else if(user_info){
+                String[] strings = line.split("\t", -1);
+                if(strings.length != 2) throw new Exception();
+                users.add(new User(strings[0],strings[1]));
+            }else {
+                String[] strings = line.split("\t", -1);
+                if (strings.length != 4) throw new Exception();
+                ServerConfiguration sConf = new ServerConfiguration(strings[0], strings[1], strings[2], strings[3]);
+                confs = appendToList(confs, sConf);
+            }
         }
         this.otherServers = new ServerConfiguration[0];
         this.configuration = null;
@@ -55,5 +70,13 @@ public class Parser {
         }
         newList[x] = element;
         return newList;
+    }
+
+    public ArrayList<User> getUsers() {
+        return users;
+    }
+
+    public String getPassword(){
+        return password;
     }
 }

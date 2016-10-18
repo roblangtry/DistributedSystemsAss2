@@ -48,7 +48,7 @@ public class Main {
             System.out.printf("Done\n");
             System.out.printf("Creating Server Manager... ");
             serverManager = new ServerManager(configuration.getServerId(),
-                    serverCommunicator);
+                    serverCommunicator, parseObject.getUsers());
             System.out.printf("Done\n");
             System.out.printf("Starting Server Communicator... ");
             serverCommunicator.start(serverManager);
