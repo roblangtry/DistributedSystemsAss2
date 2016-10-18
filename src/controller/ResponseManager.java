@@ -27,6 +27,7 @@ public class ResponseManager {
             JSONObject jsonObject = (JSONObject) parser.parse(command);
             String type = (String)jsonObject.get("type");
             System.out.printf("%s\n", type);
+            if(type==null)type="";
             switch (type){
                 case "newidentity":
                     return processNewIdentity((String)jsonObject.get("identity"), client,
@@ -60,6 +61,7 @@ public class ResponseManager {
                             (String)jsonObject.get("clientport"),
                             (String)jsonObject.get("coordinationport"),
                             (String)jsonObject.get("password"), client);
+                    return true;
                 case "quit":
                     processQuit(client);
                     return false;
