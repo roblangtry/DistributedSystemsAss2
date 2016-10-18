@@ -32,6 +32,8 @@ public class ServerCommunicator {
     ServerManager serverManager;
     ServerConfiguration[] otherServers;
     String serverId;
+    int port;
+    ArrayList<String> aliveServers;
     public ServerCommunicator(String serverId, int serverPort,
                               ServerConfiguration[] otherServers)
                               throws IOException {
@@ -39,6 +41,11 @@ public class ServerCommunicator {
         System.out.printf("Port %d used... ", serverPort);
         this.otherServers = otherServers;
         this.serverId = serverId;
+        this.port = serverPort;
+        aliveServers = new ArrayList<>();
+        for (ServerConfiguration server : otherServers){
+            aliveServers.add(server.getServerId());
+        }
     }
     public void start(ServerManager sManager){
         this.serverThread = new ServerThread(serverSocket, sManager);
@@ -60,7 +67,8 @@ public class ServerCommunicator {
         } catch (IOException e) {}
     }
     public ArrayList<String> checkOtherServers(){
-        ArrayList<String> aliveServers = new ArrayList<>();
+        ArrayList<String> oldServers = aliveServers;
+        aliveServers = new ArrayList<>();
         CommunicationNode node = null;
         for(ServerConfiguration config : otherServers){
             try {
@@ -89,11 +97,19 @@ public class ServerCommunicator {
                 }
             }
         }
+        for(String server : oldServers){
+            if(!aliveServers.contains(server))
+                System.out.printf("Server '%s' is down\n", server);
+        }
+        for(String server : aliveServers){
+            if(!oldServers.contains(server))
+                System.out.printf("Server '%s' is up\n", server);
+        }
         return aliveServers;
     }
 
     private void processCheckAlive(){
-        ArrayList<String> aliveServers = checkOtherServers();
+        aliveServers = checkOtherServers();
         if(aliveServers.size()!=otherServers.length){
             //dead server exists
             ArrayList<String> deadServers = new ArrayList<>();
@@ -111,18 +127,25 @@ public class ServerCommunicator {
             }
             //handling
             for(String id :deadServers){
-                System.out.println("dead server found: " + id);
                 //remove chatrooms
                 serverManager.deleteForeignRoom(id);
                 //remove from otherServers
             }
         }
     }
-    public boolean obtainIdentityLocks(String identity, String serverId, String auth, String pass) {
-        // obtain identity locks on other servers
+    public boolean obtainIdentityLocks(String identity, String serverId,
+                                       String auth, String pass) {
+        // obtain identity locks on all servers
         boolean obtain = true;
+        boolean authorised = false;
         CommunicationNode node = null;
-        for(ServerConfiguration config : otherServers){
+        ServerConfiguration[] allServers =
+                new ServerConfiguration[otherServers.length+1];
+        for(int i=0;i<otherServers.length;i++)
+            allServers[i]=otherServers[i];
+        allServers[allServers.length-1] = new ServerConfiguration(this.serverId,
+                "127.0.0.1",String.valueOf(this.port),String.valueOf(this.port));
+        for(ServerConfiguration config : allServers){
             try {
                 node = new CommunicationNode(config);
                 JSONParser parser = new JSONParser();
@@ -138,7 +161,10 @@ public class ServerCommunicator {
                 JSONObject returnObj = (JSONObject)parser.parse(commandIn);
                 boolean approved = ((String)returnObj
                         .get("locked")).equals("true");
+                boolean authed = ((String)returnObj
+                        .get("authorised")).equals("true");
                 obtain = obtain && approved;
+                authorised = authorised || authed;
                 node.close();
             } catch (IOException ioe) {
                 try {
@@ -154,7 +180,9 @@ public class ServerCommunicator {
                 }
             }
         }
-        return obtain;
+        if(!obtain) System.out.printf("Couldn't Lock... ");
+        if(!authorised) System.out.printf("Couldn't Authorise... ");
+        return obtain && authorised;
     }
 
     public void releaseIdentityLocks(String identity, String serverId) {
@@ -285,8 +313,8 @@ public class ServerCommunicator {
                 throws IOException {
             SSLSocketFactory sslsocketfactory =
                     (SSLSocketFactory) SSLSocketFactory.getDefault();
-            this.socket = (SSLSocket) sslsocketfactory.createSocket(
-                    configuration.getAddress(),configuration.getServerPort());
+            this.socket = (SSLSocket) sslsocketfactory.createSocket();
+            this.socket.connect(new InetSocketAddress(configuration.getAddress(), configuration.getServerPort()),500);
             this.reader = new BufferedReader(new InputStreamReader(
                     socket.getInputStream()));
             this.writer = new PrintWriter(socket.getOutputStream());
