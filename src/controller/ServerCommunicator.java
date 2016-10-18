@@ -317,6 +317,16 @@ public class ServerCommunicator {
         serverThread.shutdown();
     }
 
+    public void sendServer(JSONObject jsonObj) {
+        for(ServerConfiguration config : otherServers){
+            try {
+                CommunicationNode cn = new CommunicationNode(config);
+                cn.writeLine(jsonObj.toJSONString());
+                cn.close();
+            } catch (IOException e) {}
+        }
+    }
+
     public class CommunicationNode{
         // just a quick wrapper for the server configuration class
         // for ease of communication

@@ -60,7 +60,8 @@ public class ResponseManager {
                             (String)jsonObject.get("serveraddress"),
                             (String)jsonObject.get("clientport"),
                             (String)jsonObject.get("coordinationport"),
-                            (String)jsonObject.get("password"), client);
+                            (String)jsonObject.get("password"), jsonObject,
+                            client);
                     return true;
                 case "quit":
                     processQuit(client);
@@ -74,7 +75,8 @@ public class ResponseManager {
     }
 
     private void processAddServer(String serverid,String serveraddress, String clientport,
-                                  String coordinationport, String password, Client client){
+                                  String coordinationport, String password, JSONObject jsonObj,
+                                  Client client){
         JSONObject jsonObject = new JSONObject();
         ServerConfiguration newConfig = new ServerConfiguration(serverid,
                 serveraddress, clientport, coordinationport);
@@ -83,7 +85,7 @@ public class ResponseManager {
             jsonObject.put("approved", "true");
             jsonObject.put("serverid", serverid);
             client.addToQueue(jsonObject.toJSONString());
-
+            serverManager.getServerCommunicator().sendServer(jsonObj);
         }else{
             jsonObject.put("type", "addserver");
             jsonObject.put("approved", "false");

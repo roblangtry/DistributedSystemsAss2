@@ -217,9 +217,26 @@ public class ServerManager {
                 return this.deletedRoom(jsonObject);
             case "checkalive":
                 return this.checkAlive(jsonObject);
+            case "addserver":
+                return this.addServer(jsonObject);
             default:
                 return "";
         }
+    }
+
+    public String addServer(JSONObject jsonObject) {
+        String serverid = (String)jsonObject.get("serverid");
+        String serveraddress = (String)jsonObject.get("serveraddress");
+        String clientport = (String)jsonObject.get("clientport");
+        String coordinationport = (String)jsonObject.get("coordinationport");
+        String password =(String)jsonObject.get("password");
+        ServerConfiguration newConfig = new ServerConfiguration(serverid,
+                serveraddress, clientport, coordinationport);
+
+        if(this.checkPassword(password)) {
+            this.getServerCommunicator().addNewServer(newConfig);
+        }
+        return "";
     }
 
     private String checkAlive(JSONObject jsonObject){
@@ -416,4 +433,5 @@ public class ServerManager {
             otherRooms.remove(ids[k]);
         }
     }
+
 }
